@@ -1,0 +1,14 @@
+// Wifi Configuration
+#define WIFI_SSID     ""
+#define WIFI_PASSWORD ""
+
+// MQTT Configuration
+#define MQTT_SERVER   "" // IP Address
+#define MQTT_USER     "" // Username
+#define MQTT_PASSWORD "" // Password
+
+// BMP280 sensor
+#define BMP_SCK  13
+#define BMP_MISO 12
+#define BMP_MOSI 11
+#define BMP_CS   10
