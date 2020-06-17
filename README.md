@@ -9,7 +9,7 @@ This project sends the temperature from a (Adafruit) bmp280 sensor to an MQTT se
 
 ### Wiring
 
-![Image of wiring](https://github.com/pminnebach/ArduinoTemperature/blob/master/sketch_bb.jpg)
+![Image of wiring](https://raw.githubusercontent.com/pminnebach/ArduinoTemperature/master/sketch_bb.jpg)
 
 ## Shoulder, giants
 
