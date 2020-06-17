@@ -1,16 +1,13 @@
-/*
- Basic ESP8266 MQTT publish client example
-*/
+#include <Wire.h>
+#include <SPI.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
-#include <Wire.h>
-#include <SPI.h>
-// Include configuration
-#include "iot_config.h"
+#include <Adafruit_GFX.h>
+#include "Adafruit_LEDBackpack.h"
+#include "iot_config.h" // Include custom configuration
 
-// Update these with values suitable for your network.
 const char *ssid = WIFI_SSID;
 const char *password = WIFI_PASSWORD;
 const char *mqtt_server = MQTT_SERVER;
@@ -19,6 +16,9 @@ const char *mqtt_pass = MQTT_PASSWORD;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+// Hardware
+Adafruit_7segment matrix = Adafruit_7segment();
 Adafruit_BMP280 bmp; // I2C
 
 unsigned long lastMsg = 0;
@@ -35,6 +35,18 @@ void setup_wifi()
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+}
+
+void setup_sensor()
+{
+  Serial.println("setup_sensor() bmp280 sensor.");
+  Serial.println(F("BMP280 test"));
+  if (!bmp.begin())
+  {
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring!"));
+    while (1)
+      ;
+  }
 }
 
 void reconnect()
@@ -59,34 +71,26 @@ void reconnect()
   }
 }
 
-void setup_sensor()
-{
-  Serial.println(F("BMP280 test"));
-  if (!bmp.begin())
-  {
-    Serial.println(F("Could not find a valid BMP280 sensor, check wiring!"));
-    while (1)
-      ;
-  }
-}
-
-void setup()
-{
-  Serial.println("Set baud: 9600");
+void setup() {
+#ifndef __AVR_ATtiny85__
   Serial.begin(9600);
   delay(100);
+  Serial.println("7 Segment Backpack Test");
+#endif
+  Serial.println("setup() matrix.");
+  matrix.begin(0x70);
 
-  Serial.println("SETUP wifi.");
+  Serial.println("setup() wifi.");
   setup_wifi();
 
+  Serial.println("setup() MQTT.");
   client.setServer(mqtt_server, 1883);
 
-  Serial.println("SETUP sensor.");
+  Serial.println("setup() bmp280 sensor.");
   setup_sensor();
 }
 
-void loop()
-{
+void loop() {
   char msg[8];
   if (!client.connected())
   {
@@ -94,20 +98,37 @@ void loop()
   }
   client.loop();
 
+  float temperature;
+  String pressure; 
+  
+  temperature = bmp.readTemperature();
+  pressure = bmp.readPressure();
+ 
+  Serial.print(F("Temperature = "));
+  Serial.print(temperature);
+  Serial.println(" *C");
+
+  Serial.print(F("Pressure = "));
+  Serial.print(pressure);
+  Serial.println(" Pa");
+  
+  Serial.println();
+
+  // print a floating point 
+  matrix.print(temperature);
+  matrix.writeDisplay();
+
   unsigned long now = millis();
   if (now - lastMsg > 60000)
   {
     lastMsg = now;
 
-    String temperature, pressure;
-    temperature = bmp.readTemperature();
-    Serial.print(F("Temperature = "));
-    Serial.print(temperature);
-    Serial.println(" *C");
-
     sprintf(msg, "%f", bmp.readTemperature());
     client.publish("mq2_mqtt", msg);
-    Serial.print("temperature:");
-    Serial.println(msg);
+    Serial.print(F("Temperature = "));
+    Serial.print(msg);
+    Serial.println(" *C");
   }
+  
+  delay(5000);
 }
