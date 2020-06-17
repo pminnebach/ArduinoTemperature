@@ -21,6 +21,8 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 Adafruit_BMP280 bmp; // I2C
 
+unsigned long lastMsg = 0;
+
 void setup_wifi()
 {
   // Connecting to a WiFi network
@@ -90,19 +92,22 @@ void loop()
   {
     reconnect();
   }
+  client.loop();
 
-  String temperature, pressure;
-  temperature = bmp.readTemperature();
-  Serial.print(F("Temperature = "));
-  Serial.print(temperature);
-  Serial.println(" *C");
-  // pressure = bmp.readPressure();
+  unsigned long now = millis();
+  if (now - lastMsg > 60000)
+  {
+    lastMsg = now;
 
-  // sprintf(msg, "%i", analogRead(mq2pin));
-  sprintf(msg, "%f", bmp.readTemperature());
-  client.publish("mq2_mqtt", msg);
-  Serial.print("temperature:");
-  Serial.println(msg);
+    String temperature, pressure;
+    temperature = bmp.readTemperature();
+    Serial.print(F("Temperature = "));
+    Serial.print(temperature);
+    Serial.println(" *C");
 
-  delay(60000);
+    sprintf(msg, "%f", bmp.readTemperature());
+    client.publish("mq2_mqtt", msg);
+    Serial.print("temperature:");
+    Serial.println(msg);
+  }
 }
