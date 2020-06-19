@@ -142,7 +142,7 @@ void loop()
     client.publish("mq2_mqtt", msg);
     Serial.print(F("Message = "));
     Serial.print(msg);
-    Serial.println(" *C");
+    Serial.println();
   }
   
   delay(5000);
