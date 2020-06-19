@@ -2,3 +2,4 @@
 .vscode/
 
 iot_config.h
+temperature_config.h
