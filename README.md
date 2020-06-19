@@ -8,7 +8,12 @@ This project sends the temperature from a (Adafruit) bmp280 sensor to an MQTT se
 - [Adafruit bmp280](https://www.adafruit.com/product/2651)
 - [Adafruit 0.56" 4-Digit 7-Segment Display w/I2C Backpack - Blue](https://www.adafruit.com/product/881)
 
-### Wiring
+## Libraries
+
+- [Adafruit_BMP280_Library](https://github.com/adafruit/Adafruit_BMP280_Library)
+- [Adafruit_LED_Backpack](https://github.com/adafruit/Adafruit_LED_Backpack)
+
+## Wiring
 
 ![Image of wiring](https://raw.githubusercontent.com/pminnebach/ArduinoTemperature/master/sketch_bb.jpg)
 
