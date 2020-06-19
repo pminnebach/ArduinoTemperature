@@ -1,27 +1,29 @@
 #include <Wire.h>
 #include <SPI.h>
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BMP280.h>
-#include <Adafruit_GFX.h>
-#include "Adafruit_LEDBackpack.h"
-#include "iot_config.h" // Include custom configuration
+#include <ESP8266WiFi.h>          // WiFi
+#include <PubSubClient.h>         // MQTT
+#include <Adafruit_Sensor.h>      // bmp280
+#include <Adafruit_BMP280.h>      // bmp280
+#include <Adafruit_GFX.h>         // Seven segment
+#include "Adafruit_LEDBackpack.h" // Seven segment
+#include <WiFiUdp.h>              // NTP
+#include <NTPClient.h>            // NTP
+#include "temperature_config.h"   // Private configuration file
 
 const char *ssid = WIFI_SSID;
 const char *password = WIFI_PASSWORD;
 const char *mqtt_server = MQTT_SERVER;
 const char *mqtt_user = MQTT_USER;
 const char *mqtt_pass = MQTT_PASSWORD;
+unsigned long lastMsg = 0;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
-// Hardware
 Adafruit_7segment matrix = Adafruit_7segment();
 Adafruit_BMP280 bmp; // I2C
-
-unsigned long lastMsg = 0;
 
 void setup_wifi()
 {
@@ -71,9 +73,10 @@ void reconnect()
   }
 }
 
-void setup() {
+void setup() 
+{
 #ifndef __AVR_ATtiny85__
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(100);
   Serial.println("7 Segment Backpack Test");
 #endif
@@ -88,30 +91,41 @@ void setup() {
 
   Serial.println("setup() bmp280 sensor.");
   setup_sensor();
+
+  Serial.println("setup() NTP timeClient.begin().");
+  timeClient.begin();
 }
 
-void loop() {
-  char msg[8];
+void loop() 
+{
   if (!client.connected())
   {
     reconnect();
   }
   client.loop();
 
-  float temperature;
-  String pressure; 
+  timeClient.update();
+
+  char msg[30];
+  float temperature,pressure;
+  long epoch;
   
   temperature = bmp.readTemperature();
   pressure = bmp.readPressure();
+  epoch = timeClient.getEpochTime();
+
+  Serial.print(F("Epoch       = "));
+  Serial.print(epoch);
+  Serial.println();
  
   Serial.print(F("Temperature = "));
   Serial.print(temperature);
   Serial.println(" *C");
 
-  Serial.print(F("Pressure = "));
-  Serial.print(pressure);
-  Serial.println(" Pa");
-  
+  Serial.print(F("Pressure    = "));
+  Serial.print(pressure/100);
+  Serial.println(" hPa");
+
   Serial.println();
 
   // print a floating point 
@@ -123,9 +137,10 @@ void loop() {
   {
     lastMsg = now;
 
-    sprintf(msg, "%f", bmp.readTemperature());
+    //sprintf(msg, "%f", bmp.readTemperature());
+    sprintf(msg, "%ld;%.2f;%.2f",epoch,temperature,(pressure/100));
     client.publish("mq2_mqtt", msg);
-    Serial.print(F("Temperature = "));
+    Serial.print(F("Message = "));
     Serial.print(msg);
     Serial.println(" *C");
   }
