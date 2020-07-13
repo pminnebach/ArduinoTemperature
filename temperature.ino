@@ -22,21 +22,40 @@ PubSubClient client(espClient);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 
+// Static IP Configuration
+IPAddress staticIP = IP_ADDRESS;
+IPAddress gateway = IP_GATEWAY;
+IPAddress subnet = IP_SUBNET;
+IPAddress dns = IP_DNS;
+
+// Device hostname configuration
+const char *deviceName = DEVICE_NAME;
+
 Adafruit_7segment matrix = Adafruit_7segment();
 Adafruit_BMP280 bmp; // I2C
 
 void setup_wifi()
 {
-  // Connecting to a WiFi network
+  WiFi.disconnect();  //Prevent connecting to wifi based on previous configuration  
+  WiFi.hostname(deviceName);
+  if (!WiFi.config(staticIP, gateway, subnet, dns)) {
+    Serial.println("STA Failed to configure");
+  }
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     Serial.print(".");
-  }
+  }  
+  
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+
+  Serial.println();
+  // WiFi.printDiag(Serial);
 }
 
 void setup_sensor()
@@ -73,8 +92,27 @@ void reconnect()
   }
 }
 
+void preinit() {
+	/*
+	 * Global WiFi constructors are not called yet
+	 * (global class instances like WiFi, Serial... are not yet initialized)..
+	 * No global object methods or C++ exceptions can be called in here!
+	 * The below is a static class method, which is similar to a function, so it's ok.
+	 */
+  ESP8266WiFiClass::preinitWiFiOff();
+}
+
 void setup() 
 {
+  /* 
+   *  Prevent the device from connecting to any wifi
+   *  before we're able to set the static IP configuration.
+   */
+  WiFi.setAutoConnect(false);
+
+  // Enable or disable debug according to your needs.
+  Serial.setDebugOutput(false);
+  
 #ifndef __AVR_ATtiny85__
   Serial.begin(115200);
   delay(100);

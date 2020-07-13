@@ -2,6 +2,13 @@
 #define WIFI_SSID     ""
 #define WIFI_PASSWORD ""
 
+//Static IP address configuration
+#define IP_ADDRESS {192, 168, 1, 123}     //ESP static ip
+#define IP_GATEWAY {192, 168, 1, 1}       //IP Address of your WiFi Router (Gateway)
+#define IP_SUBNET  {255, 255, 255, 0}     //Subnet mask
+#define IP_DNS     {8, 8, 8, 8}           //DNS
+#define DEVICE_NAME "esp8266.example.com"
+
 // MQTT Configuration
 #define MQTT_SERVER   "" // IP Address
 #define MQTT_USER     "" // Username

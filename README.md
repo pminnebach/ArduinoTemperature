@@ -20,4 +20,6 @@ This project sends the temperature from a (Adafruit) bmp280 sensor to an MQTT se
 ## Shoulder, giants
 
 https://funprojects.blog/2018/12/07/rabbitmq-for-iot/
-
+https://microcontrollerslab.com/esp32-static-fix-ip-address/
+https://github.com/esp8266/Arduino/issues/3489#issuecomment-454443182
+https://github.com/esp8266/Arduino/blob/8a64a1236f447009bd53fec4863aff9bf5428b59/libraries/ESP8266WiFi/examples/EarlyDisableWiFi/EarlyDisableWiFi.ino#L18
